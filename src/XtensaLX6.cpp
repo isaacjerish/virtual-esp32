@@ -100,7 +100,6 @@ void XtensaLX6::executeJMP(uint32_t instruction) {
 }
 
 void XtensaLX6::executeNOP(uint32_t /*instruction*/) {
-    // NOP: No operation
     pc += 2; // Advance PC by 2 bytes (narrow instruction)
 }
 

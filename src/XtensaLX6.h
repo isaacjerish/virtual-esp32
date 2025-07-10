@@ -20,6 +20,7 @@ private:
     void decodeAndExecute(uint32_t instruction);
     
     // Individual instruction implementations
+    void executeNOP(uint32_t instruction);
     void executeL32IN(uint32_t instruction);
     void executeS32IN(uint32_t instruction);
     void executeADDN(uint32_t instruction);

@@ -25,6 +25,9 @@ private:
     void executeS32IN(uint32_t instruction);
     void executeADDN(uint32_t instruction);
     void executeJMP(uint32_t instruction);
+    void executeSUBN(uint32_t instruction);
+    void executeMOVN(uint32_t instruction);
+    void executeBEQN(uint32_t instruction);
 
 public:
     explicit XtensaLX6(Memory* mem);

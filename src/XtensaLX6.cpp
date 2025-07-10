@@ -50,6 +50,18 @@ void XtensaLX6::decodeAndExecute(uint32_t instruction) {
         case 0x3: // JMP
             executeJMP(instruction);
             break;
+        case 0x4: // NOP
+            executeNOP(instruction);
+            break;
+        case 0x5: // SUB.N
+            executeSUBN(instruction);
+            break;
+        case 0x6: // MOV.N
+            executeMOVN(instruction);
+            break;
+        case 0x7: // BEQ.N
+            executeBEQN(instruction);
+            break;
         default:
             throw std::runtime_error("Unknown instruction opcode: " + std::to_string(opcode));
     }
@@ -100,7 +112,39 @@ void XtensaLX6::executeJMP(uint32_t instruction) {
 }
 
 void XtensaLX6::executeNOP(uint32_t /*instruction*/) {
+    // NOP: No operation
     pc += 2; // Advance PC by 2 bytes (narrow instruction)
+}
+
+void XtensaLX6::executeSUBN(uint32_t instruction) {
+    uint8_t ar = (instruction >> 8) & 0x0F;  // Destination register
+    uint8_t as = (instruction >> 12) & 0x0F; // Source register 1
+    uint8_t at = (instruction >> 4) & 0x0F;  // Source register 2
+    
+    registers[ar] = registers[as] - registers[at];
+    
+    pc += 2; // Narrow instruction is 2 bytes
+}
+
+void XtensaLX6::executeMOVN(uint32_t instruction) {
+    uint8_t ar = (instruction >> 8) & 0x0F;  // Destination register
+    uint8_t as = (instruction >> 12) & 0x0F; // Source register
+    
+    registers[ar] = registers[as];
+    
+    pc += 2; // Narrow instruction is 2 bytes
+}
+
+void XtensaLX6::executeBEQN(uint32_t instruction) {
+    uint8_t as = (instruction >> 8) & 0x0F;   // Source register 1
+    uint8_t at = (instruction >> 12) & 0x0F;  // Source register 2
+    int8_t imm8 = (instruction >> 4) & 0xFF;  // Signed immediate offset
+    
+    if (registers[as] == registers[at]) {
+        pc += (imm8 * 2); // Branch offset is in 16-bit units
+    }
+    
+    pc += 2; // Always advance PC by instruction size
 }
 
 uint32_t XtensaLX6::getRegister(uint8_t reg) const {

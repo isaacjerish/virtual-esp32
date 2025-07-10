@@ -1,0 +1,43 @@
+# Build directories
+obj/
+bin/
+firmware/obj/
+firmware/bin/
+
+# Binary files
+*.bin
+*.elf
+*.o
+*.a
+*.so
+*.dylib
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Map files
+*.map
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Firmware binary (generated)
+firmware.bin 

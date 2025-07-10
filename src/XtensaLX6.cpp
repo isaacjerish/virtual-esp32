@@ -99,6 +99,11 @@ void XtensaLX6::executeJMP(uint32_t instruction) {
     pc = registers[ar];
 }
 
+void XtensaLX6::executeNOP(uint32_t /*instruction*/) {
+    // NOP: No operation
+    pc += 2; // Advance PC by 2 bytes (narrow instruction)
+}
+
 uint32_t XtensaLX6::getRegister(uint8_t reg) const {
     if (reg >= 16) {
         throw std::out_of_range("Register index out of range: " + std::to_string(reg));

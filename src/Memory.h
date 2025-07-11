@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdint>
 #include <map>
+#include <functional>
 
 
 class Memory {
@@ -12,13 +13,18 @@ private:
     static constexpr uint32_t RAM_END = 0x3FFFFFFF;
     
     std::vector<uint8_t> ram;
-    std::map<uint32_t, uint32_t> peripheralMappings; // address -> peripheral_id
+    
+    std::function<uint8_t(uint32_t)> peripheralRead8Callback;
+    std::function<uint16_t(uint32_t)> peripheralRead16Callback;
+    std::function<uint32_t(uint32_t)> peripheralRead32Callback;
+    std::function<void(uint32_t, uint8_t)> peripheralWrite8Callback;
+    std::function<void(uint32_t, uint16_t)> peripheralWrite16Callback;
+    std::function<void(uint32_t, uint32_t)> peripheralWrite32Callback;
 
 public:
     Memory();
     ~Memory() = default;
 
-    // Core memory access
     uint8_t read8(uint32_t address) const;
     uint16_t read16(uint32_t address) const;
     uint32_t read32(uint32_t address) const;
@@ -27,21 +33,22 @@ public:
     void write16(uint32_t address, uint16_t value);
     void write32(uint32_t address, uint32_t value);
     
-    // Bulk operations
     void writeBytes(uint32_t address, const std::vector<uint8_t>& data);
     std::vector<uint8_t> readBytes(uint32_t address, size_t length) const;
     
-    // Memory validation
     bool isValidAddress(uint32_t address) const;
     bool isRAMAddress(uint32_t address) const;
     bool isPeripheralAddress(uint32_t address) const;
     
-    // Peripheral mapping
-    void mapPeripheral(uint32_t address, uint32_t peripheralId);
-    void unmapPeripheral(uint32_t address);
-    uint32_t getPeripheralId(uint32_t address) const;
+    void setPeripheralCallbacks(
+        std::function<uint8_t(uint32_t)> read8,
+        std::function<uint16_t(uint32_t)> read16,
+        std::function<uint32_t(uint32_t)> read32,
+        std::function<void(uint32_t, uint8_t)> write8,
+        std::function<void(uint32_t, uint16_t)> write16,
+        std::function<void(uint32_t, uint32_t)> write32
+    );
     
-    // Debug
     void dumpMemory(uint32_t address, size_t length) const;
     size_t getRAMSize() const { return RAM_SIZE; }
     uint32_t getRAMBase() const { return RAM_BASE; }

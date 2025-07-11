@@ -9,6 +9,22 @@ Memory::Memory() : ram(RAM_SIZE, 0) {
     std::cout << "RAM range: 0x" << std::hex << RAM_BASE << " - 0x" << RAM_END << std::dec << std::endl;
 }
 
+void Memory::setPeripheralCallbacks(
+    std::function<uint8_t(uint32_t)> read8,
+    std::function<uint16_t(uint32_t)> read16,
+    std::function<uint32_t(uint32_t)> read32,
+    std::function<void(uint32_t, uint8_t)> write8,
+    std::function<void(uint32_t, uint16_t)> write16,
+    std::function<void(uint32_t, uint32_t)> write32
+) {
+    peripheralRead8Callback = read8;
+    peripheralRead16Callback = read16;
+    peripheralRead32Callback = read32;
+    peripheralWrite8Callback = write8;
+    peripheralWrite16Callback = write16;
+    peripheralWrite32Callback = write32;
+}
+
 uint8_t Memory::read8(uint32_t address) const {
     if (!isValidAddress(address)) {
         throw std::out_of_range("Invalid memory address: 0x" + std::to_string(address));
@@ -20,9 +36,8 @@ uint8_t Memory::read8(uint32_t address) const {
     }
     
     // Handle peripheral reads
-    if (isPeripheralAddress(address)) {
-        // This will be handled by the emulator's peripheral system
-        return 0; // Placeholder - actual peripheral read happens in Emulator
+    if (isPeripheralAddress(address) && peripheralRead8Callback) {
+        return peripheralRead8Callback(address);
     }
     
     return 0;
@@ -33,10 +48,19 @@ uint16_t Memory::read16(uint32_t address) const {
         throw std::runtime_error("Unaligned 16-bit read at address: 0x" + std::to_string(address));
     }
     
-    uint16_t value = 0;
-    value |= static_cast<uint16_t>(read8(address));
-    value |= static_cast<uint16_t>(read8(address + 1)) << 8;
-    return value;
+    if (isRAMAddress(address)) {
+        uint16_t value = 0;
+        value |= static_cast<uint16_t>(read8(address));
+        value |= static_cast<uint16_t>(read8(address + 1)) << 8;
+        return value;
+    }
+    
+    // Handle peripheral reads
+    if (isPeripheralAddress(address) && peripheralRead16Callback) {
+        return peripheralRead16Callback(address);
+    }
+    
+    return 0;
 }
 
 uint32_t Memory::read32(uint32_t address) const {
@@ -44,12 +68,21 @@ uint32_t Memory::read32(uint32_t address) const {
         throw std::runtime_error("Unaligned 32-bit read at address: 0x" + std::to_string(address));
     }
     
-    uint32_t value = 0;
-    value |= static_cast<uint32_t>(read8(address));
-    value |= static_cast<uint32_t>(read8(address + 1)) << 8;
-    value |= static_cast<uint32_t>(read8(address + 2)) << 16;
-    value |= static_cast<uint32_t>(read8(address + 3)) << 24;
-    return value;
+    if (isRAMAddress(address)) {
+        uint32_t value = 0;
+        value |= static_cast<uint32_t>(read8(address));
+        value |= static_cast<uint32_t>(read8(address + 1)) << 8;
+        value |= static_cast<uint32_t>(read8(address + 2)) << 16;
+        value |= static_cast<uint32_t>(read8(address + 3)) << 24;
+        return value;
+    }
+    
+    // Handle peripheral reads
+    if (isPeripheralAddress(address) && peripheralRead32Callback) {
+        return peripheralRead32Callback(address);
+    }
+    
+    return 0;
 }
 
 void Memory::write8(uint32_t address, uint8_t value) {
@@ -60,9 +93,8 @@ void Memory::write8(uint32_t address, uint8_t value) {
     if (isRAMAddress(address)) {
         uint32_t offset = address - RAM_BASE;
         ram[offset] = value;
-    } else if (isPeripheralAddress(address)) {
-        // This will be handled by the emulator's peripheral system
-        // Placeholder - actual peripheral write happens in Emulator
+    } else if (isPeripheralAddress(address) && peripheralWrite8Callback) {
+        peripheralWrite8Callback(address, value);
     }
 }
 
@@ -71,8 +103,12 @@ void Memory::write16(uint32_t address, uint16_t value) {
         throw std::runtime_error("Unaligned 16-bit write at address: 0x" + std::to_string(address));
     }
     
-    write8(address, value & 0xFF);
-    write8(address + 1, (value >> 8) & 0xFF);
+    if (isRAMAddress(address)) {
+        write8(address, value & 0xFF);
+        write8(address + 1, (value >> 8) & 0xFF);
+    } else if (isPeripheralAddress(address) && peripheralWrite16Callback) {
+        peripheralWrite16Callback(address, value);
+    }
 }
 
 void Memory::write32(uint32_t address, uint32_t value) {
@@ -80,10 +116,14 @@ void Memory::write32(uint32_t address, uint32_t value) {
         throw std::runtime_error("Unaligned 32-bit write at address: 0x" + std::to_string(address));
     }
     
-    write8(address, value & 0xFF);
-    write8(address + 1, (value >> 8) & 0xFF);
-    write8(address + 2, (value >> 16) & 0xFF);
-    write8(address + 3, (value >> 24) & 0xFF);
+    if (isRAMAddress(address)) {
+        write8(address, value & 0xFF);
+        write8(address + 1, (value >> 8) & 0xFF);
+        write8(address + 2, (value >> 16) & 0xFF);
+        write8(address + 3, (value >> 24) & 0xFF);
+    } else if (isPeripheralAddress(address) && peripheralWrite32Callback) {
+        peripheralWrite32Callback(address, value);
+    }
 }
 
 void Memory::writeBytes(uint32_t address, const std::vector<uint8_t>& data) {

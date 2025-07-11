@@ -19,8 +19,12 @@ uint8_t Memory::read8(uint32_t address) const {
         return ram[offset];
     }
     
-    // For peripheral addresses, return 0 for now
-    // This will be handled by peripheral classes later
+    // Handle peripheral reads
+    if (isPeripheralAddress(address)) {
+        // This will be handled by the emulator's peripheral system
+        return 0; // Placeholder - actual peripheral read happens in Emulator
+    }
+    
     return 0;
 }
 
@@ -56,9 +60,9 @@ void Memory::write8(uint32_t address, uint8_t value) {
     if (isRAMAddress(address)) {
         uint32_t offset = address - RAM_BASE;
         ram[offset] = value;
-    } else {
-        // For peripheral addresses, this will be handled by peripheral classes
-        // For now, just ignore writes to peripheral space
+    } else if (isPeripheralAddress(address)) {
+        // This will be handled by the emulator's peripheral system
+        // Placeholder - actual peripheral write happens in Emulator
     }
 }
 

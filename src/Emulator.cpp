@@ -5,7 +5,11 @@
 Emulator::Emulator() : running(false), cycles(0) {
     // Initialize system components
     memory = std::make_unique<Memory>();
-    cpu = std::make_unique<XtensaLX6>(memory.get());
+    cpu = std::make_unique<XtensaLX6>(memory.get(), this);
+    
+    // Add UART peripheral
+    auto uart = std::make_unique<UART>();
+    addPeripheral(std::move(uart));
     
     std::cout << "ESP32 Emulator initialized" << std::endl;
 }
@@ -71,3 +75,54 @@ Peripheral* Emulator::getPeripheral(uint32_t address) const {
     return nullptr;
 } 
 // TODO: Implement peripheral interrupt handling
+
+uint8_t Emulator::readPeripheral8(uint32_t address) const {
+    Peripheral* peripheral = getPeripheral(address);
+    if (peripheral) {
+        uint32_t offset = address - peripheral->getBaseAddress();
+        return peripheral->read8(offset);
+    }
+    return 0;
+}
+
+uint16_t Emulator::readPeripheral16(uint32_t address) const {
+    Peripheral* peripheral = getPeripheral(address);
+    if (peripheral) {
+        uint32_t offset = address - peripheral->getBaseAddress();
+        return peripheral->read16(offset);
+    }
+    return 0;
+}
+
+uint32_t Emulator::readPeripheral32(uint32_t address) const {
+    Peripheral* peripheral = getPeripheral(address);
+    if (peripheral) {
+        uint32_t offset = address - peripheral->getBaseAddress();
+        return peripheral->read32(offset);
+    }
+    return 0;
+}
+
+void Emulator::writePeripheral8(uint32_t address, uint8_t value) {
+    Peripheral* peripheral = getPeripheral(address);
+    if (peripheral) {
+        uint32_t offset = address - peripheral->getBaseAddress();
+        peripheral->write8(offset, value);
+    }
+}
+
+void Emulator::writePeripheral16(uint32_t address, uint16_t value) {
+    Peripheral* peripheral = getPeripheral(address);
+    if (peripheral) {
+        uint32_t offset = address - peripheral->getBaseAddress();
+        peripheral->write16(offset, value);
+    }
+}
+
+void Emulator::writePeripheral32(uint32_t address, uint32_t value) {
+    Peripheral* peripheral = getPeripheral(address);
+    if (peripheral) {
+        uint32_t offset = address - peripheral->getBaseAddress();
+        peripheral->write32(offset, value);
+    }
+}

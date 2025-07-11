@@ -1,0 +1,28 @@
+Project Name: virtual-esp32 - Virtual ESP32 Emulator and Firmware Environment
+
+Goal: Create a CLI app (vesp) that emulates the core features of an ESP32 SoC (Xtensa LX6). It’s written in C++20 and can load/execute firmware binaries written in C11, compiled using xtensa-esp32-elf-gcc.
+
+Languages:
+	•	Emulator: C++20 (g++/clang++)
+	•	Firmware: C11 (xtensa toolchain)
+	•	Build: Makefiles for both
+
+Architecture Overview:
+	•	main.cpp: CLI entry point, loads firmware
+	•	Emulator.{h,cpp}: Runs fetch-decode-execute loop, owns CPU + memory + peripherals
+	•	XtensaLX6.{h,cpp}: CPU simulation (PC + A0-A15 + instruction logic)
+	•	Memory.{h,cpp}: Simulates 4MB RAM + maps peripherals
+	•	peripherals/: UART, WiFi, etc. (each as its own C++ class)
+
+Phase 1:
+	•	CPU + RAM
+	•	Implements basic Xtensa instructions: L32I.N, S32I.N, ADD.N, JMP
+	•	Load firmware.bin from CLI and run it
+
+Phase 2:
+	•	Add UART peripheral mapped to 0x3FF40000
+	•	Print “Hello, World!” via firmware writing to that address
+
+Phase 3 (Stretch):
+	•	Simulated WiFi peripheral using host networking (via sockets or high-level lib)
+	•	Firmware can write to registers to trigger HTTP requests and read responses

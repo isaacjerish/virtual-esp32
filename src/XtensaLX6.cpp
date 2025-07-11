@@ -4,7 +4,6 @@
 #include <stdexcept>
 
 XtensaLX6::XtensaLX6(Memory* mem) : memory(mem), pc(0) {
-    // Initialize registers to 0
     for (int i = 0; i < 16; i++) {
         registers[i] = 0;
     }
@@ -13,13 +12,10 @@ XtensaLX6::XtensaLX6(Memory* mem) : memory(mem), pc(0) {
 }
 
 void XtensaLX6::execute() {
-    // Fetch instruction at current PC
     uint32_t instruction = fetchInstruction();
     
-    // Decode and execute
     decodeAndExecute(instruction);
     
-    // Increment PC (unless instruction was a jump)
 }
 
 void XtensaLX6::reset() {
@@ -34,7 +30,6 @@ uint32_t XtensaLX6::fetchInstruction() {
 }
 
 void XtensaLX6::decodeAndExecute(uint32_t instruction) {
-    // Extract opcode (bits 0-3 for narrow instructions)
     uint8_t opcode = instruction & 0x0F;
     
     switch (opcode) {
@@ -69,12 +64,12 @@ void XtensaLX6::decodeAndExecute(uint32_t instruction) {
 
 void XtensaLX6::executeL32IN(uint32_t instruction) {
 
-    uint8_t ar = (instruction >> 8) & 0x0F;  // Destination register
-    uint8_t as = (instruction >> 12) & 0x0F; // Source register
-    uint8_t imm8 = (instruction >> 4) & 0xFF; // Immediate offset
+    uint8_t ar = (instruction >> 8) & 0x0F; 
+    uint8_t as = (instruction >> 12) & 0x0F; 
+    uint8_t imm8 = (instruction >> 4) & 0xFF;
     
     uint32_t address = registers[as] + imm8;
-    uint32_t value = memory->read32(address);
+    uint32_t value = readMemory(address);
     registers[ar] = value;
     
     pc += 2; // Narrow instruction is 2 bytes
@@ -82,22 +77,21 @@ void XtensaLX6::executeL32IN(uint32_t instruction) {
 
 void XtensaLX6::executeS32IN(uint32_t instruction) {
 
-    uint8_t ar = (instruction >> 8) & 0x0F;  // Source register
-    uint8_t as = (instruction >> 12) & 0x0F; // Base register
-    uint8_t imm8 = (instruction >> 4) & 0xFF; // Immediate offset
+    uint8_t ar = (instruction >> 8) & 0x0F;  
+    uint8_t as = (instruction >> 12) & 0x0F; 
+    uint8_t imm8 = (instruction >> 4) & 0xFF; 
     
     uint32_t address = registers[as] + imm8;
-    memory->write32(address, registers[ar]);
+    writeMemory(address, registers[ar]);
     
-    pc += 2; // Narrow instruction is 2 bytes
+    pc += 2;
 }
 
 void XtensaLX6::executeADDN(uint32_t instruction) {
-    // ADD.N: Add registers
-    // Format: ADD.N ar, as, at
-    uint8_t ar = (instruction >> 8) & 0x0F;  // Destination register
-    uint8_t as = (instruction >> 12) & 0x0F; // Source register 1
-    uint8_t at = (instruction >> 4) & 0x0F;  // Source register 2
+
+    uint8_t ar = (instruction >> 8) & 0x0F; 
+    uint8_t as = (instruction >> 12) & 0x0F; 
+    uint8_t at = (instruction >> 4) & 0x0F; 
     
     registers[ar] = registers[as] + registers[at];
     
@@ -111,40 +105,40 @@ void XtensaLX6::executeJMP(uint32_t instruction) {
     pc = registers[ar];
 }
 
-void XtensaLX6::executeNOP(uint32_t /*instruction*/) {
-    // NOP: No operation
-    pc += 2; // Advance PC by 2 bytes (narrow instruction)
+void XtensaLX6::executeNOP(uint32_t instruction) {
+   
+    pc += 2; 
 }
 
 void XtensaLX6::executeSUBN(uint32_t instruction) {
-    uint8_t ar = (instruction >> 8) & 0x0F;  // Destination register
-    uint8_t as = (instruction >> 12) & 0x0F; // Source register 1
-    uint8_t at = (instruction >> 4) & 0x0F;  // Source register 2
+    uint8_t ar = (instruction >> 8) & 0x0F;  
+    uint8_t as = (instruction >> 12) & 0x0F; 
+    uint8_t at = (instruction >> 4) & 0x0F;  
     
     registers[ar] = registers[as] - registers[at];
     
-    pc += 2; // Narrow instruction is 2 bytes
+    pc += 2; 
 }
 
 void XtensaLX6::executeMOVN(uint32_t instruction) {
-    uint8_t ar = (instruction >> 8) & 0x0F;  // Destination register
-    uint8_t as = (instruction >> 12) & 0x0F; // Source register
+    uint8_t ar = (instruction >> 8) & 0x0F; 
+    uint8_t as = (instruction >> 12) & 0x0F; 
     
     registers[ar] = registers[as];
     
-    pc += 2; // Narrow instruction is 2 bytes
+    pc += 2;
 }
 
 void XtensaLX6::executeBEQN(uint32_t instruction) {
-    uint8_t as = (instruction >> 8) & 0x0F;   // Source register 1
-    uint8_t at = (instruction >> 12) & 0x0F;  // Source register 2
-    int8_t imm8 = (instruction >> 4) & 0xFF;  // Signed immediate offset
+    uint8_t as = (instruction >> 8) & 0x0F;   
+    uint8_t at = (instruction >> 12) & 0x0F; 
+    int8_t imm8 = (instruction >> 4) & 0xFF;
     
     if (registers[as] == registers[at]) {
-        pc += (imm8 * 2); // Branch offset is in 16-bit units
+        pc += (imm8 * 2); 
     }
     
-    pc += 2; // Always advance PC by instruction size
+    pc += 2; 
 }
 
 uint32_t XtensaLX6::getRegister(uint8_t reg) const {
@@ -162,10 +156,24 @@ void XtensaLX6::setRegister(uint8_t reg, uint32_t value) {
 }
 
 uint32_t XtensaLX6::readMemory(uint32_t address) const {
+    if (address >= 0x3FF00000 && address < 0x3FF80000) {
+        if (peripheralReadCallback) {
+            return peripheralReadCallback(address);
+        }
+        return 0;
+    }
+    
     return memory->read32(address);
 }
 
 void XtensaLX6::writeMemory(uint32_t address, uint32_t value) {
+    if (address >= 0x3FF00000 && address < 0x3FF80000) {
+        if (peripheralWriteCallback) {
+            peripheralWriteCallback(address, value);
+        }
+        return;
+    }
+    
     memory->write32(address, value);
 }
 

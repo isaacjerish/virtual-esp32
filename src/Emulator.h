@@ -38,4 +38,13 @@ public:
     // Statistics
     uint64_t getCycles() const { return cycles; }
     bool isRunning() const { return running; }
+
+    // Peripheral memory access
+    uint8_t readPeripheral8(uint32_t address) const;
+    uint16_t readPeripheral16(uint32_t address) const;
+    uint32_t readPeripheral32(uint32_t address) const;
+    
+    void writePeripheral8(uint32_t address, uint8_t value);
+    void writePeripheral16(uint32_t address, uint16_t value);
+    void writePeripheral32(uint32_t address, uint32_t value);
 }; 

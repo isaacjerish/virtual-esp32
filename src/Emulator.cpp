@@ -5,7 +5,20 @@
 Emulator::Emulator() : running(false), cycles(0) {
     // Initialize system components
     memory = std::make_unique<Memory>();
-    cpu = std::make_unique<XtensaLX6>(memory.get(), this);
+    cpu = std::make_unique<XtensaLX6>(memory.get());
+    
+    // Set up peripheral callbacks
+    memory->setPeripheralCallbacks(
+        [this](uint32_t addr) { return readPeripheral8(addr); },
+        [this](uint32_t addr) { return readPeripheral16(addr); },
+        [this](uint32_t addr) { return readPeripheral32(addr); },
+        [this](uint32_t addr, uint8_t val) { writePeripheral8(addr, val); },
+        [this](uint32_t addr, uint16_t val) { writePeripheral16(addr, val); },
+        [this](uint32_t addr, uint32_t val) { writePeripheral32(addr, val); }
+    );
+    
+    cpu->setPeripheralReadCallback([this](uint32_t addr) { return readPeripheral32(addr); });
+    cpu->setPeripheralWriteCallback([this](uint32_t addr, uint32_t val) { writePeripheral32(addr, val); });
     
     // Add UART peripheral
     auto uart = std::make_unique<UART>();

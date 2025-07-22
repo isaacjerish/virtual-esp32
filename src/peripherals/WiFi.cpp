@@ -51,14 +51,13 @@ void WiFi::write8(uint32_t offset, uint8_t value) {
     switch (offset) {
         case WIFI_CONTROL_OFFSET:
             controlRegister = value;
-            if (value & 0x01) {  // Connect bit
+            if (value & 0x01) {  
                 connect();
             }
-            if (value & 0x02) {  // Disconnect bit
+            if (value & 0x02) {  
                 disconnect();
             }
-            if (value & 0x04) {  // Send request bit
-                // Trigger HTTP request
+            if (value & 0x04) { 
                 std::cout << "WiFi: HTTP request triggered" << std::endl;
             }
             break;
@@ -157,7 +156,6 @@ bool WiFi::sendHttpRequest(const std::string& url) {
     requestPending = true;
     std::cout << "WiFi: Sending HTTP request to " << url << std::endl;
     
-    // Simulate response
     std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, World!";
     for (char c : response) {
         responseBuffer.push(static_cast<uint8_t>(c));

@@ -1,15 +1,12 @@
 
-/* Sets up the initial stack and jumps to main() */
 
     .section .text.startup
     .global _start
     .align 4
 
 _start:
-    /* Set up stack pointer */
-    movi    a1, 0x3FFE0000  /* Stack at top of RAM */
+    movi    a1, 0x3FFE0000  
     
-    /* Clear BSS section */
     movi    a2, __bss_start
     movi    a3, __bss_end
     sub     a3, a3, a2
@@ -24,7 +21,6 @@ _start:
     /* Call main() */
     call0   main
     
-    /* If main returns, loop forever */
     j       .
 
     .section .bss

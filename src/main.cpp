@@ -17,14 +17,12 @@ int main(int argc, char* argv[]) {
 
     std::string firmwarePath = argv[1];
     
-    // Load firmware binary
     std::ifstream firmwareFile(firmwarePath, std::ios::binary);
     if (!firmwareFile.is_open()) {
         std::cerr << "Error: Could not open firmware file: " << firmwarePath << std::endl;
         return 1;
     }
 
-    // Read firmware into vector
     std::vector<uint8_t> firmware;
     firmwareFile.seekg(0, std::ios::end);
     firmware.resize(firmwareFile.tellg());
@@ -34,7 +32,6 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Loaded firmware: " << firmwarePath << " (" << firmware.size() << " bytes)" << std::endl;
 
-    // Create and run emulator
     try {
         Emulator emulator;
         emulator.loadFirmware(firmware);
@@ -46,4 +43,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 } 
-// TODO: Support memory-mapped peripheral initialization via config file

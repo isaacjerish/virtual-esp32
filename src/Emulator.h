@@ -21,25 +21,20 @@ public:
     Emulator();
     ~Emulator() = default;
 
-    // Core emulation methods
     void loadFirmware(const std::vector<uint8_t>& firmware);
     void run();
     void step();
     void stop();
 
-    // System access
     XtensaLX6* getCPU() const { return cpu.get(); }
     Memory* getMemory() const { return memory.get(); }
     
-    // Peripheral management
     void addPeripheral(std::unique_ptr<Peripheral> peripheral);
     Peripheral* getPeripheral(uint32_t address) const;
 
-    // Statistics
     uint64_t getCycles() const { return cycles; }
     bool isRunning() const { return running; }
 
-    // Peripheral memory access
     uint8_t readPeripheral8(uint32_t address) const;
     uint16_t readPeripheral16(uint32_t address) const;
     uint32_t readPeripheral32(uint32_t address) const;

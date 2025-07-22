@@ -3,11 +3,9 @@
 #include <stdexcept>
 
 Emulator::Emulator() : running(false), cycles(0) {
-    // Initialize system components
     memory = std::make_unique<Memory>();
     cpu = std::make_unique<XtensaLX6>(memory.get());
     
-    // Set up peripheral callbacks
     memory->setPeripheralCallbacks(
         [this](uint32_t addr) { return readPeripheral8(addr); },
         [this](uint32_t addr) { return readPeripheral16(addr); },
@@ -20,7 +18,6 @@ Emulator::Emulator() : running(false), cycles(0) {
     cpu->setPeripheralReadCallback([this](uint32_t addr) { return readPeripheral32(addr); });
     cpu->setPeripheralWriteCallback([this](uint32_t addr, uint32_t val) { writePeripheral32(addr, val); });
     
-    // Add UART peripheral
     auto uart = std::make_unique<UART>();
     addPeripheral(std::move(uart));
     
@@ -32,11 +29,9 @@ void Emulator::loadFirmware(const std::vector<uint8_t>& firmware) {
         throw std::runtime_error("Firmware is empty");
     }
     
-    // Load firmware into memory starting at 0x40080000 (typical ESP32 entry point)
     const uint32_t firmwareBase = 0x40080000;
     memory->writeBytes(firmwareBase, firmware);
     
-    // Set CPU PC to firmware entry point
     cpu->setPC(firmwareBase);
     
     std::cout << "Firmware loaded at 0x" << std::hex << firmwareBase << std::dec << std::endl;
@@ -55,11 +50,9 @@ void Emulator::step() {
     if (!running) return;
     
     try {
-        // Execute one CPU cycle
         cpu->execute();
         cycles++;
         
-        // Handle any peripheral updates
         for (auto& peripheral : peripherals) {
             peripheral->update();
         }
@@ -87,7 +80,6 @@ Peripheral* Emulator::getPeripheral(uint32_t address) const {
     }
     return nullptr;
 } 
-// TODO: Implement peripheral interrupt handling
 
 uint8_t Emulator::readPeripheral8(uint32_t address) const {
     Peripheral* peripheral = getPeripheral(address);

@@ -72,7 +72,7 @@ void XtensaLX6::executeL32IN(uint32_t instruction) {
     uint32_t value = readMemory(address);
     registers[ar] = value;
     
-    pc += 2; // Narrow instruction is 2 bytes
+    pc += 2; 
 }
 
 void XtensaLX6::executeS32IN(uint32_t instruction) {

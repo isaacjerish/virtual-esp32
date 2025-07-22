@@ -35,7 +35,6 @@ uint8_t Memory::read8(uint32_t address) const {
         return ram[offset];
     }
     
-    // Handle peripheral reads
     if (isPeripheralAddress(address) && peripheralRead8Callback) {
         return peripheralRead8Callback(address);
     }
@@ -55,7 +54,6 @@ uint16_t Memory::read16(uint32_t address) const {
         return value;
     }
     
-    // Handle peripheral reads
     if (isPeripheralAddress(address) && peripheralRead16Callback) {
         return peripheralRead16Callback(address);
     }
@@ -77,7 +75,6 @@ uint32_t Memory::read32(uint32_t address) const {
         return value;
     }
     
-    // Handle peripheral reads
     if (isPeripheralAddress(address) && peripheralRead32Callback) {
         return peripheralRead32Callback(address);
     }
@@ -158,7 +155,6 @@ bool Memory::isRAMAddress(uint32_t address) const {
 }
 
 bool Memory::isPeripheralAddress(uint32_t address) const {
-    // Peripheral space is typically 0x3FF00000 - 0x3FF7FFFF
     return address >= 0x3FF00000 && address < RAM_BASE;
 }
 

@@ -20,7 +20,6 @@ int main() {
     
     uart_puts("Firmware execution complete.\n");
     
-    // Infinite loop
     while (1) {
         delay(1000000);
     }
@@ -41,6 +40,5 @@ void uart_puts(const char* str) {
 
 void delay(uint32_t cycles) {
     for (volatile uint32_t i = 0; i < cycles; i++) {
-        // Busy wait
     }
 } 

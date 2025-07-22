@@ -86,7 +86,6 @@ void UART::reset() {
     txReady = true;
     rxReady = false;
     
-    // Clear buffers
     while (!txBuffer.empty()) txBuffer.pop();
     while (!rxBuffer.empty()) rxBuffer.pop();
 }
